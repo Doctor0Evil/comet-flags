@@ -1,0 +1,7 @@
+field,profile_id,string,required
+field,description,string,required
+field,mode,enum(CONSERVATIVE,COPILOT,AUTOEVOLVE,SAFE_BASELINE),required
+field,enabled_flags,array[string],required
+field,forbidden_flags,array[string],required
+field,risk_annotation,enum(low,medium,high),optional
+invariant,disjoint_sets,"enabled_flags ∩ forbidden_flags == ∅"
