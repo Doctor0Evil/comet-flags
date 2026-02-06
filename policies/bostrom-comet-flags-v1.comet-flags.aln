@@ -1,0 +1,3 @@
+id,description,category,data_sensitivity,source_metric,roh_risk_hint,monotone_constraint
+enable_high_cognitive_load_mode,"UI densification when cog load low","ui","normalized_score_only","BioState.cognitiveloadindex","medium",""
+dream_sensitivity_toggle,"Dream-aware suggestions only","behavior","normalized_score_only","BioState.dream.riskscore","high",""
