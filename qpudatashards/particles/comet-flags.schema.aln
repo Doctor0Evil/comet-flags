@@ -1,0 +1,8 @@
+field,id,string,required
+field,description,string,required
+field,category,string,required # ui, behavior, safety
+field,data_sensitivity,enum(normalized_score_only,raw_biophysical,derived_neural),required
+field,source_metric,string,required # e.g., BioState.cognitiveloadindex
+field,roh_risk_hint,enum(low,medium,high),optional
+field,monotone_constraint,string,optional # e.g., value >= @previous.value
+invariant,forbid_raw_neural,"data_sensitivity != 'raw_biophysical'"
