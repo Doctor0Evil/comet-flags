@@ -1,0 +1,84 @@
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  background-color: #121212;
+  color: #e0e0e0;
+  margin: 0;
+  padding: 20px;
+}
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.header {
+  padding: 20px;
+  background-color: #1e1e1e;
+  border-bottom: 1px solid #333;
+  margin-bottom: 20px;
+}
+
+.header h1 {
+  margin: 0;
+  color: #bb86fc;
+}
+
+.header p {
+  margin: 5px 0 0;
+  color: #a0a0a0;
+}
+
+.warning {
+  background-color: #332020;
+  color: #f8b0b0;
+  padding: 15px;
+  border: 1px solid #5c3030;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.flag-section {
+  background-color: #1e1e1e;
+  border: 1px solid #333;
+  border-radius: 4px;
+  margin-bottom: 20px;
+}
+
+.flag-section h2 {
+  padding: 15px;
+  margin: 0;
+  background-color: #2a2a2a;
+  border-bottom: 1px solid #333;
+  color: #bb86fc;
+}
+
+.flag-entry {
+  padding: 15px;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.flag-entry:last-child {
+  border-bottom: none;
+}
+
+.flag-title {
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.flag-description {
+  color: #b0b0b0;
+  margin-top: 5px;
+}
+
+.flag-id {
+  font-family: "Courier New", Courier, monospace;
+  color: #6a9955;
+  background-color: #282828;
+  padding: 2px 4px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  display: block;
+  margin-top: 10px;
+}
