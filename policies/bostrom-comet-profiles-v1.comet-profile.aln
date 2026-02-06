@@ -1,0 +1,4 @@
+profile_id,description,mode,enabled_flags,forbidden_flags,risk_annotation
+SAFE_BASELINE,"Minimal, neurorights-only core","CONSERVATIVE","[]","[experimental_feature_A,experimental_feature_B]","low"
+COPILOT,"Assistive, suggest-only","COPILOT","[language_tone_helper]","[auto_arch_change]","medium"
+AUTOEVOLVE,"Bounded autonomy","AUTOEVOLVE","[language_tone_helper,adaptive_ui]","[]","high"
