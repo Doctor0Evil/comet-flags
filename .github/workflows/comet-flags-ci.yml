@@ -1,0 +1,106 @@
+name: comet-flags invariants
+
+on:
+  pull_request:
+    paths:
+      - "qpudatashards/particles/comet-*.schema.aln"
+      - "policies/*comet-*.aln"
+      - "qpudatashards/particles/evolution-proposals.evolve.jsonl"
+      - "logs/donutloopledger.aln"
+      - "policies/bostrom-stake-*.stake.aln"
+  push:
+    branches: [ main ]
+    paths:
+      - "qpudatashards/particles/comet-*.schema.aln"
+      - "policies/*comet-*.aln"
+      - "qpudatashards/particles/evolution-proposals.evolve.jsonl"
+      - "logs/donutloopledger.aln"
+      - "policies/bostrom-stake-*.stake.aln"
+
+jobs:
+  comet-flags-checks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Cargo builds
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            target
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # 1. Build shared validators (organiccpualn + sovereigntycore + comet_flags)
+      - name: Build validation binaries
+        run: |
+          cargo build --locked \
+            -p organiccpualn \
+            -p sovereigntycore \
+            -p comet_flags
+
+      # 2. Schema + ALN validation for comet-flags and comet-profiles
+      - name: Validate comet ALN schemas and policy shards
+        run: |
+          # Assumes comet_flags exposes a CLI `comet-flags-validate`
+          # that reads schema + policy paths from CLI args or defaults.
+          target/debug/comet-flags-validate \
+            --flags-schema qpudatashards/particles/comet-flags.schema.aln \
+            --profiles-schema qpudatashards/particles/comet-profile.schema.aln \
+            --flags policies/bostrom-comet-flags-v1.comet-flags.aln \
+            --profiles policies/bostrom-comet-profiles-v1.comet-profile.aln
+
+      # 3. Mental-privacy invariant: no raw biophysical sources in flags
+      - name: Enforce mental privacy on comet flags
+        run: |
+          # Same binary, stricter mode: fails if any flag uses raw_biophysical
+          target/debug/comet-flags-validate \
+            --flags policies/bostrom-comet-flags-v1.comet-flags.aln \
+            --check-mental-privacy
+
+      # 4. Cross-repo CONSERVATIVE / SAFE_BASELINE consistency
+      - name: Check profile semantics consistency
+        run: |
+          # This test binary should assert that SAFE_BASELINE / CONSERVATIVE
+          # have canonical forbidden_flags and risk annotations.
+          cargo test -p comet_flags --tests -- \
+            profile_consistency_safe_baseline
+
+      # 5. Safer-only updates over .evolve.jsonl (monotone envelopes + RoH ≤ 0.3)
+      - name: Static analysis of evolution proposals
+        run: |
+          # organiccpualn provides a CLI `evolve-check` that:
+          # - parses evolution-proposals.evolve.jsonl
+          # - loads qpudatashards/particles/bostrom-rohmodel-v1.rohmodel.aln
+          # - enforces rohafter <= 0.3 and monotone safety envelopes.
+          target/debug/evolve-check \
+            --rohmodel qpudatashards/particles/bostrom-rohmodel-v1.rohmodel.aln \
+            --evolve qpudatashards/particles/evolution-proposals.evolve.jsonl
+
+      # 6. Donutloop ledger integrity + RoH invariants
+      - name: Verify donutloop ledger chain and RoH invariants
+        run: |
+          # organiccpualn provides a CLI `donutloop-verify` that:
+          # - recomputes hash chain over logs/donutloopledger.aln
+          # - checks rohafter <= 0.3
+          # - checks monotone safety for entries tagged as safety-tightening.
+          target/debug/donutloop-verify \
+            --ledger logs/donutloopledger.aln
+
+      # 7. Stake / governance invariants for comet-related changes
+      - name: Enforce stake-based governance rules
+        run: |
+          # sovereigntycore exposes a CLI `stake-guard` that:
+          # - loads policies/bostrom-stake-v1.stake.aln
+          # - checks that any evolution touching comet-* artifacts
+          #   has the required roles / DIDs in its signatures (from .evolve.jsonl).
+          target/debug/stake-guard \
+            --stake policies/bostrom-stake-v1.stake.aln \
+            --evolve qpudatashards/particles/evolution-proposals.evolve.jsonl
